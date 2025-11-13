@@ -489,6 +489,21 @@ with tab1:
         st.write("**Staff Cost: ${:.0f} per hour**".format(st.session_state.get('staff_cost', 15)))
         staff_cost = st.slider("Staff Cost ($/hr)", 10, 40, st.session_state.get('staff_cost', 15),
                               step=1, key='cost_slider', label_visibility='collapsed')
+        st.write("")
+        st.write("**Price Sensitivity (a): {:.2f}**".format(st.session_state.get('price_sens', 0.13)))
+        price_sens = st.slider("Price Sensitivity (a)", 0.0, 1.0, st.session_state.get('price_sens', 0.13),
+                            step=0.01, key='price_sens_slider', label_visibility='collapsed')
+
+        st.write("")
+        st.write("**Alpha (α): {:.2f}**".format(st.session_state.get('alpha', 0.08)))
+        alpha = st.slider("Alpha (α)", 0.0, 0.5, st.session_state.get('alpha', 0.08),
+                        step=0.01, key='alpha_slider', label_visibility='collapsed')
+
+        st.write("")
+        st.write("**Lambda (λ): {:.2f}**".format(st.session_state.get('lambda', 0.9)))
+        _lambda = st.slider("Lambda (λ)", 0.0, 1.0, st.session_state.get('lambda', 0.9),
+                            step=0.01, key='lambda_slider', label_visibility='collapsed')
+
         
         st.write("")
         
@@ -499,7 +514,10 @@ with tab1:
             st.session_state['cust_rate'] = cust_rate
             st.session_state['multiplier'] = multiplier
             st.session_state['staff_cost'] = staff_cost
-        
+            st.session_state['price_sens'] = price_sens
+            st.session_state['alpha'] = alpha
+            st.session_state['lambda'] = _lambda
+                
         if st.session_state.get('solve', False) and st.session_state.get('iterations'):
             iters = st.session_state.get('iterations', 0)
             deltas = st.session_state.get('deltas', [])
@@ -523,13 +541,14 @@ with tab1:
     with col_right:
         if st.session_state.get('solve', False):
             params = {
-                'cust_rate': cust_rate,
-                'price_sens': 0.13,
-                'labor_effect': 0.08,
-                'staff_cost': staff_cost,
-                'multiplier': multiplier,
-                'penalty': 5
-            }
+                    'cust_rate': cust_rate,
+                    'price_sens': price_sens,
+                    'labor_effect': alpha,
+                    'staff_cost': staff_cost,
+                    'multiplier': multiplier,
+                    'penalty': 5
+                }
+
             
             with st.spinner('Solving MDP...'):
                 values, policy, deltas, iterations = value_iteration(params, gamma, max_iter)
