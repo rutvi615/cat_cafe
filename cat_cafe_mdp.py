@@ -638,7 +638,7 @@ with tab2:
                 new_p, new_s = next_state(game['price_idx'], game['staff_idx'], action_idx)
                 prof = reward(new_p, new_s, {
                     'cust_rate': 25,
-                    'price_sens': 0.4,
+                    'price_sens': 0.9,
                     'labor_effect': 0.08,
                     'staff_cost': 15,
                     'multiplier': 1.0,
