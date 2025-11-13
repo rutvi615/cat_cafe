@@ -543,7 +543,7 @@ with tab1:
             params = {
                     'cust_rate': cust_rate,
                     'price_sens': price_sens,
-                    'labor_effect': labour_effect,
+                    'labor_effect': labor_effect,
                     'staff_cost': staff_cost,
                     'multiplier': multiplier,
                     'penalty': 5
