@@ -495,9 +495,9 @@ with tab1:
                             step=0.01, key='price_sens_slider', label_visibility='collapsed')
 
         st.write("")
-        st.write("**Alpha (α): {:.2f}**".format(st.session_state.get('alpha', 0.08)))
-        alpha = st.slider("Alpha (α)", 0.0, 0.5, st.session_state.get('alpha', 0.08),
-                        step=0.01, key='alpha_slider', label_visibility='collapsed')
+        st.write("**Labor_effect (α): {:.2f}**".format(st.session_state.get('labor_effect', 0.08)))
+        alpha = st.slider("Labor_effect (α)", 0.0, 0.5, st.session_state.get('labor_effect', 0.08),
+                        step=0.01, key='labor_effect_slider', label_visibility='collapsed')
 
         st.write("")
         st.write("**Lambda (λ): {:.2f}**".format(st.session_state.get('lambda', 0.9)))
@@ -515,7 +515,7 @@ with tab1:
             st.session_state['multiplier'] = multiplier
             st.session_state['staff_cost'] = staff_cost
             st.session_state['price_sens'] = price_sens
-            st.session_state['alpha'] = alpha
+            st.session_state['labor_effect'] = labor_effect
             st.session_state['lambda'] = _lambda
                 
         if st.session_state.get('solve', False) and st.session_state.get('iterations'):
@@ -543,7 +543,7 @@ with tab1:
             params = {
                     'cust_rate': cust_rate,
                     'price_sens': price_sens,
-                    'labor_effect': alpha,
+                    'labor_effect': labour_effect,
                     'staff_cost': staff_cost,
                     'multiplier': multiplier,
                     'penalty': 5
