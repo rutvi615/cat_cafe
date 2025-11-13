@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.colors import LinearSegmentedColormap
 
+
 # ==========================================
 # Page Configuration & Styling
 # ==========================================
@@ -15,104 +16,135 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Beautiful Dark Theme CSS with smooth transitions
+
+# Beautiful Theme CSS with Full Background Image
 st.markdown("""
 <style>
     * {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    body {
-        background-color: #0f1419;
-        color: #e0e0e0;
+    /* Full Background Image */
+    .stApp {
+        background-image: url('https://i.pinimg.com/1200x/e4/0d/e7/e40de755d51beaf8f179f92c68ee61c3.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    
+    /* Make default Streamlit backgrounds transparent */
+    .main .block-container {
+        background: transparent;
     }
     
     .stTabs [data-baseweb="tab-list"] {
         gap: 0px;
-        border-bottom: 2px solid #2a3f5f;
+        border-bottom: 2px solid rgba(238,179,233,0.4);
+        background: rgba(45, 20, 44, 0.5);
+        padding: 10px;
+        border-radius: 15px 15px 0 0;
     }
     
     .stTabs [data-baseweb="tab-list"] button {
         font-size: 15px;
         padding: 12px 25px;
-        color: #8892aa;
+        color: #84ACC4;
         background-color: transparent;
         border-bottom: 3px solid transparent;
         transition: all 0.4s ease;
     }
     
     .stTabs [data-baseweb="tab-list"] button:hover {
-        color: #a8b8d8;
+        color: #EEB3E9;
         transition: color 0.3s ease;
     }
     
     .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
-        color: #7ec8c8;
-        border-bottom: 3px solid #7ec8c8;
+        color: #EEB3E9;
+        border-bottom: 3px solid #EEB3E9;
         font-weight: 600;
         transition: all 0.3s ease;
     }
     
+    .stTabs [data-baseweb="tab-panel"] {
+        background: rgba(45, 20, 44, 0.65);
+        border-radius: 0 0 15px 15px;
+        padding: 25px;
+    }
+    
     .param-card {
-        background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+        background: rgba(45, 20, 44, 0.75);
         padding: 25px;
         border-radius: 15px;
-        border: 1px solid #2a3f5f;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        border: 1px solid rgba(238,179,233,0.3);
+        box-shadow: 0 4px 20px rgba(73,49,109,0.4);
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
     }
     
     .param-card:hover {
-        border-color: #3a5f7f;
-        box-shadow: 0 6px 20px rgba(126,200,200,0.1);
+        border-color: #EEB3E9;
+        box-shadow: 0 6px 25px rgba(238,179,233,0.3);
+        background: rgba(73, 49, 109, 0.8);
         transition: all 0.3s ease;
     }
     
     .info-box {
-        background: linear-gradient(135deg, #1a2a2a 0%, #0f1419 100%);
+        background: rgba(45, 20, 44, 0.75);
         padding: 15px;
         border-radius: 10px;
-        border-left: 4px solid #7ec8c8;
-        color: #d0d8e0;
+        border-left: 4px solid #84ACC4;
+        color: #F7E1E7;
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
     }
     
     .success-box {
-        background: linear-gradient(135deg, #1a2a1a 0%, #0f1419 100%);
+        background: rgba(73, 49, 109, 0.75);
         padding: 15px;
         border-radius: 10px;
-        border-left: 4px solid #7ec8c8;
-        color: #d0d8e0;
+        border-left: 4px solid #EEB3E9;
+        color: #F7E1E7;
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
     }
     
     .story-box {
-        background: linear-gradient(135deg, #1a2a2a 0%, #0f1419 100%);
+        background: rgba(45, 20, 44, 0.75);
         padding: 20px;
         border-radius: 12px;
-        border: 1px solid #2a3f5f;
-        color: #d0d8e0;
+        border: 1px solid rgba(238,179,233,0.3);
+        color: #F7E1E7;
         font-size: 15px;
         line-height: 1.8;
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .story-box:hover {
+        background: rgba(73, 49, 109, 0.85);
+        border-color: #EEB3E9;
     }
     
     .math-box {
-        background: linear-gradient(135deg, #1a2a3a 0%, #0f1419 100%);
+        background: rgba(71, 109, 124, 0.75);
         padding: 18px;
         border-radius: 10px;
-        border-left: 4px solid #5fa8e8;
-        color: #d0d8e0;
+        border-left: 4px solid #84ACC4;
+        color: #F7E1E7;
         font-size: 13px;
         line-height: 1.7;
         font-family: 'Courier New', monospace;
         margin: 12px 0;
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
     }
     
     .math-box:hover {
-        border-left-color: #7ec8c8;
-        box-shadow: 0 4px 12px rgba(126,200,200,0.1);
+        border-left-color: #EEB3E9;
+        box-shadow: 0 4px 12px rgba(238,179,233,0.2);
+        background: rgba(132, 172, 196, 0.8);
         transition: all 0.3s ease;
     }
     
@@ -129,71 +161,119 @@ st.markdown("""
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, #7ec8c8 0%, #5fa8e8 100%);
-        color: #0f1419;
+        background: linear-gradient(135deg, #A782A9 0%, #84ACC4 100%);
+        color: #2D142C;
         border: none;
         padding: 12px 30px;
         border-radius: 10px;
         font-weight: 600;
         font-size: 15px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(126,200,200,0.2);
+        box-shadow: 0 4px 15px rgba(238,179,233,0.3);
     }
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(126,200,200,0.3);
+        box-shadow: 0 6px 20px rgba(238,179,233,0.5);
+        background: linear-gradient(135deg, #EEB3E9 0%, #A782A9 100%);
         transition: all 0.3s ease;
     }
     
     h1, h2, h3 {
-        color: #d0d8e8;
+        color: #F7E1E7 !important;
         font-weight: 600;
         transition: all 0.3s ease;
+        text-shadow: 0 2px 10px rgba(45, 20, 44, 0.8);
     }
     
     h1 { font-size: 32px; }
     h3 { font-size: 20px; }
     
     .metric-box {
-        background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+        background: rgba(45, 20, 44, 0.75);
         border-radius: 10px;
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(238,179,233,0.2);
     }
     
     .metric-box:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(126,200,200,0.1);
+        box-shadow: 0 4px 15px rgba(238,179,233,0.2);
+        background: rgba(73, 49, 109, 0.8);
     }
     
     .reward-term {
-        background: linear-gradient(135deg, #1a2a2a 0%, #0f1419 100%);
+        background: rgba(71, 109, 124, 0.75);
         padding: 15px;
         border-radius: 10px;
-        border-left: 3px solid #7aae98;
+        border-left: 3px solid #84ACC4;
         margin: 10px 0;
         transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        color: #F7E1E7;
     }
     
     .reward-term:hover {
-        border-left-color: #7ec8c8;
+        border-left-color: #EEB3E9;
         transform: translateX(5px);
+        background: rgba(132, 172, 196, 0.85);
         transition: all 0.3s ease;
+    }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: rgba(45, 20, 44, 0.85);
+        backdrop-filter: blur(15px);
+    }
+    
+    /* Metric labels */
+    [data-testid="stMetricLabel"] {
+        color: #F7E1E7 !important;
+    }
+    
+    [data-testid="stMetricValue"] {
+        color: #EEB3E9 !important;
+    }
+    
+    /* Slider styling */
+    .stSlider [data-baseweb="slider"] {
+        background: rgba(73, 49, 109, 0.5);
+    }
+    
+    /* DataFrame styling */
+    .stDataFrame {
+        background: rgba(45, 20, 44, 0.75);
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Text color for better readability */
+    p, span, label, .stMarkdown {
+        color: #F7E1E7 !important;
+    }
+    
+    /* Divider */
+    hr {
+        border-color: rgba(238,179,233,0.3) !important;
     }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ==========================================
 # MDP Core Functions
 # ==========================================
 
+
 PRICE_LEVELS = ["Low ($3)", "Medium ($8)", "High ($15)"]
 STAFF_LEVELS = ["1 Person", "2 People", "3 People", "4 People"]
 ACTIONS = ["Raise Price", "Lower Price", "Hire Staff", "Fire Staff", "Maintain"]
 
+
 NUM_PRICES = len(PRICE_LEVELS)
 NUM_STAFF = len(STAFF_LEVELS)
 NUM_ACTIONS = len(ACTIONS)
+
 
 def reward(p, s, params, penalty=False):
     """Calculate daily profit for state (price, staff)"""
@@ -217,6 +297,7 @@ def reward(p, s, params, penalty=False):
     
     return profit
 
+
 def next_state(p, s, action):
     """Transition to next state given action"""
     p_new, s_new = p, s
@@ -231,6 +312,7 @@ def next_state(p, s, action):
         s_new = s - 1
     
     return p_new, s_new
+
 
 def value_iteration(params, discount, max_iter, convergence_threshold=1e-3):
     """Solve MDP using Value Iteration"""
@@ -282,13 +364,14 @@ def value_iteration(params, discount, max_iter, convergence_threshold=1e-3):
     
     return v, policy, deltas, iteration + 1
 
+
 def create_heatmap(values, title="Value Function Heatmap"):
     """Create beautiful soft-color heatmap"""
     fig, ax = plt.subplots(figsize=(11, 6))
     
     colors_soft = [
-        '#1a3a4a', '#2a5a7a', '#4a7fa8', '#7a9fc8', '#9ab8d8',
-        '#b8c8d8', '#d8b8a8', '#d89878', '#c86858', '#b84848'
+        '#2D142C', '#49316D', '#5D4A7A', '#7a6f9a', '#9a8fba',
+        '#A782A9', '#c8a8c8', '#d8b8d8', '#EEB3E9', '#f7d8f7'
     ]
     cmap = LinearSegmentedColormap.from_list('cafe_soft', colors_soft, N=256)
     
@@ -298,22 +381,22 @@ def create_heatmap(values, title="Value Function Heatmap"):
     
     ax.set_xticks(np.arange(NUM_STAFF))
     ax.set_yticks(np.arange(NUM_PRICES))
-    ax.set_xticklabels(STAFF_LEVELS, fontsize=12, color='#a8b8d8', fontweight=500)
-    ax.set_yticklabels(PRICE_LEVELS, fontsize=12, color='#a8b8d8', fontweight=500)
+    ax.set_xticklabels(STAFF_LEVELS, fontsize=12, color='#F7E1E7', fontweight=500)
+    ax.set_yticklabels(PRICE_LEVELS, fontsize=12, color='#F7E1E7', fontweight=500)
     
     ax.set_xticks(np.arange(NUM_STAFF) - 0.5, minor=True)
     ax.set_yticks(np.arange(NUM_PRICES) - 0.5, minor=True)
-    ax.grid(which='minor', color='#2a4a6a', linestyle='-', linewidth=2.5, alpha=0.6)
+    ax.grid(which='minor', color='#49316D', linestyle='-', linewidth=2.5, alpha=0.6)
     
     for i in range(NUM_PRICES):
         for j in range(NUM_STAFF):
             value = values[i, j]
             
             normalized = (value - vmin) / (vmax - vmin) if vmax > vmin else 0.5
-            text_color = '#0f1419' if normalized > 0.4 else '#d8d8e8'
+            text_color = '#2D142C' if normalized > 0.5 else '#F7E1E7'
             
             rect = mpatches.Rectangle((j-0.45, i-0.45), 0.9, 0.9, 
-                                     linewidth=0.5, edgecolor='#3a5a7a', 
+                                     linewidth=0.5, edgecolor='#EEB3E9', 
                                      facecolor='none', alpha=0.3)
             ax.add_patch(rect)
             
@@ -321,26 +404,27 @@ def create_heatmap(values, title="Value Function Heatmap"):
                    color=text_color, fontsize=13, fontweight='600', 
                    bbox=dict(boxstyle='round,pad=0.4', facecolor='none', edgecolor='none'))
     
-    ax.set_xlabel("Staff Level", fontsize=13, color='#a8b8d8', fontweight=600, labelpad=12)
-    ax.set_ylabel("Price Level", fontsize=13, color='#a8b8d8', fontweight=600, labelpad=12)
-    ax.set_title(title, fontsize=16, color='#d0d8e8', pad=20, fontweight=600)
+    ax.set_xlabel("Staff Level", fontsize=13, color='#F7E1E7', fontweight=600, labelpad=12)
+    ax.set_ylabel("Price Level", fontsize=13, color='#F7E1E7', fontweight=600, labelpad=12)
+    ax.set_title(title, fontsize=16, color='#F7E1E7', pad=20, fontweight=600)
     
     cbar = plt.colorbar(im, ax=ax, pad=0.02)
-    cbar.set_label('Expected Profit ($)', color='#a8b8d8', fontsize=12, fontweight=500, labelpad=15)
-    cbar.ax.tick_params(colors='#a8b8d8', labelsize=11)
-    cbar.outline.set_edgecolor('#2a4a6a')
+    cbar.set_label('Expected Profit ($)', color='#F7E1E7', fontsize=12, fontweight=500, labelpad=15)
+    cbar.ax.tick_params(colors='#F7E1E7', labelsize=11)
+    cbar.outline.set_edgecolor('#49316D')
     cbar.outline.set_linewidth(1.5)
     
-    fig.patch.set_facecolor('#0f1419')
-    ax.set_facecolor('#1a2a3a')
-    ax.spines['bottom'].set_color('#2a4a6a')
-    ax.spines['left'].set_color('#2a4a6a')
+    fig.patch.set_facecolor('#2D142C')
+    ax.set_facecolor('#49316D')
+    ax.spines['bottom'].set_color('#EEB3E9')
+    ax.spines['left'].set_color('#EEB3E9')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.tick_params(colors='#a8b8d8', labelsize=11)
+    ax.tick_params(colors='#F7E1E7', labelsize=11)
     
     plt.tight_layout()
     return fig
+
 
 def create_policy_table(policy):
     """Create beautiful soft-colored policy table with visible text"""
@@ -348,11 +432,11 @@ def create_policy_table(policy):
     ax.axis('off')
     
     action_colors = {
-        0: '#7a9fa8',
-        1: '#8a9f98',
-        2: '#7aae98',
-        3: '#c89888',
-        4: '#9a7ab8'
+        0: '#7a6f9a',
+        1: '#9a8fba',
+        2: '#84ACC4',
+        3: '#A782A9',
+        4: '#5D4A7A'
     }
     
     action_names = {
@@ -389,46 +473,50 @@ def create_policy_table(policy):
             cell = table[(i+1, j)]
             action_idx = int(policy[i, j])
             cell.set_facecolor(action_colors[action_idx])
-            cell.set_text_props(weight='600', color='#f0f0f0', fontsize=11)
+            cell.set_text_props(weight='600', color='#F7E1E7', fontsize=11)
             cell.set_linewidth(1.5)
-            cell.set_edgecolor('#1a2a3a')
+            cell.set_edgecolor('#2D142C')
     
     for j in range(NUM_STAFF):
         cell = table[(0, j)]
-        cell.set_facecolor('#1a2a3a')
-        cell.set_text_props(weight='600', color='#a8b8d8', fontsize=11)
+        cell.set_facecolor('#2D142C')
+        cell.set_text_props(weight='600', color='#F7E1E7', fontsize=11)
         cell.set_linewidth(1.5)
-        cell.set_edgecolor('#2a4a6a')
+        cell.set_edgecolor('#49316D')
     
     for i in range(NUM_PRICES):
         cell = table[(i+1, -1)]
-        cell.set_facecolor('#1a2a3a')
-        cell.set_text_props(weight='600', color='#a8b8d8', fontsize=11)
+        cell.set_facecolor('#2D142C')
+        cell.set_text_props(weight='600', color='#F7E1E7', fontsize=11)
         cell.set_linewidth(1.5)
-        cell.set_edgecolor('#2a4a6a')
+        cell.set_edgecolor('#49316D')
     
-    fig.patch.set_facecolor('#0f1419')
-    plt.suptitle("Optimal Policy: Best Action per State", fontsize=16, color='#d0d8e8', 
+    fig.patch.set_facecolor('#2D142C')
+    plt.suptitle("Optimal Policy: Best Action per State", fontsize=16, color='#F7E1E7', 
              y=0.98, fontweight=600)
     
     return fig
+
 
 # ==========================================
 # Main App
 # ==========================================
 
+
 st.markdown("""
 <div style='text-align: center; margin-bottom: 20px; margin-top: -30px;'>
-    <h1 style='color: #7ec8c8; font-size: 36px; font-weight: 600; margin-bottom: 8px;'>Whisker's Cafe</h1>
-    <p style='color: #8892aa; font-size: 16px; margin: 0; font-style: italic;'>Optimize your adorable cat cafe using Markov Decision Processes</p>
+    <h1 style='color: #EEB3E9; font-size: 36px; font-weight: 600; margin-bottom: 8px; text-shadow: 0 2px 15px rgba(45, 20, 44, 0.9);'>Whisker's Cafe</h1>
+    <p style='color: #F7E1E7; font-size: 16px; margin: 0; font-style: italic; text-shadow: 0 1px 8px rgba(45, 20, 44, 0.8);'>Optimize your adorable cat cafe using Markov Decision Processes</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 st.markdown("""
 <div style='text-align: center; margin-bottom: 25px;'>
     <div style='font-size: 2.5em; animation: float 3s ease-in-out infinite;'>🐱</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 st.markdown("""
 <div class='story-box'>
@@ -446,9 +534,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
 st.write("")
 
+
 tab1, tab2, tab3 = st.tabs(["Configure & Solve", "Cafe Simulation", "Learn & Explore"])
+
 
 # ==========================================
 # TAB 1: MDP SOLVER
@@ -459,14 +550,14 @@ with tab1:
     with col_left:
         st.markdown("""
         <div class='param-card'>
-            <h3 style='margin-top: 0; color: #d0d8e8;'>Cafe Optimization Engine</h3>
+            <h3 style='margin-top: 0; color: #F7E1E7;'>Cafe Optimization Engine</h3>
         </div>
         """, unsafe_allow_html=True)
         
         st.write("")
         
         st.write("**Discount Factor (γ): {:.2f}**".format(st.session_state.get('gamma', 0.95)))
-        st.write("<span style='color: #8892aa; font-size: 13px;'>How much you value future profit</span>", unsafe_allow_html=True)
+        st.write("<span style='color: #F7E1E7; font-size: 13px;'>How much you value future profit</span>", unsafe_allow_html=True)
         gamma = st.slider("Discount Factor", 0.50, 0.99, st.session_state.get('gamma', 0.95), 
                          step=0.01, key='gamma_slider', label_visibility='collapsed')
         
@@ -494,10 +585,12 @@ with tab1:
         price_sens = st.slider("Price Sensitivity (a)", 0.0, 1.0, st.session_state.get('price_sens', 0.13),
                             step=0.01, key='price_sens_slider', label_visibility='collapsed')
 
+
         st.write("")
         st.write("**Labor_effect : {:.2f}**".format(st.session_state.get('labor_effect', 0.08)))
         labor_effect = st.slider("Labor_effect ", 0.0, 0.5, st.session_state.get('labor_effect', 0.08),
                         step=0.01, key='labor_effect_slider', label_visibility='collapsed')
+
 
 
         
@@ -523,15 +616,15 @@ with tab1:
             
             st.markdown(f"""
             <div class='info-box' style='margin-top: 25px;'>
-                <p style='color: #7ec8c8; font-weight: 600; margin: 8px 0;'>Converged in {iters} iterations</p>
-                <p style='color: #8892aa; margin: 8px 0; font-size: 13px;'>Final delta: {final_delta:.8f}</p>
+                <p style='color: #EEB3E9; font-weight: 600; margin: 8px 0;'>Converged in {iters} iterations</p>
+                <p style='color: #F7E1E7; margin: 8px 0; font-size: 13px;'>Final delta: {final_delta:.8f}</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown(f"""
             <div class='success-box' style='margin-top: 15px;'>
-                <p style='color: #8892aa; margin: 5px 0; font-size: 13px;'>Best Expected Daily Profit</p>
-                <p style='color: #7ec8c8; font-size: 32px; font-weight: 600; margin: 12px 0;'>${best_val:.2f}</p>
+                <p style='color: #F7E1E7; margin: 5px 0; font-size: 13px;'>Best Expected Daily Profit</p>
+                <p style='color: #EEB3E9; font-size: 32px; font-weight: 600; margin: 12px 0;'>${best_val:.2f}</p>
             </div>
             """, unsafe_allow_html=True)
     
@@ -546,6 +639,7 @@ with tab1:
                     'penalty': 5
                 }
 
+
             
             with st.spinner('Solving MDP...'):
                 values, policy, deltas, iterations = value_iteration(params, gamma, max_iter)
@@ -556,30 +650,31 @@ with tab1:
             st.session_state['iterations'] = iterations
             
             st.subheader("Value Function Heatmap")
-            st.write("<span style='color: #8892aa; font-size: 13px;'>Expected profit for each price/staff combination</span>", 
+            st.write("<span style='color: #F7E1E7; font-size: 13px;'>Expected profit for each price/staff combination</span>", 
                     unsafe_allow_html=True)
             fig_heat = create_heatmap(values)
             st.pyplot(fig_heat, use_container_width=True)
             
             st.subheader("Optimal Policy")
-            st.write("<span style='color: #8892aa; font-size: 13px;'>Best action for each state</span>", 
+            st.write("<span style='color: #F7E1E7; font-size: 13px;'>Best action for each state</span>", 
                     unsafe_allow_html=True)
             fig_policy = create_policy_table(policy)
             st.pyplot(fig_policy, use_container_width=True)
         else:
             st.markdown("""
             <div class='info-box'>
-                <p style='color: #7ec8c8; font-weight: 600;'>Ready to optimize?</p>
-                <p style='color: #8892aa;'>Configure the parameters on the left and click <b>'Solve Optimal Policy'</b> to discover the best cafe strategy!</p>
+                <p style='color: #EEB3E9; font-weight: 600;'>Ready to optimize?</p>
+                <p style='color: #F7E1E7;'>Configure the parameters on the left and click <b>'Solve Optimal Policy'</b> to discover the best cafe strategy!</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div style='text-align: center; margin-top: 40px;'>
                 <div style='font-size: 4em; animation: float 3s ease-in-out infinite;'>😺</div>
-                <p style='color: #8892aa; margin-top: 15px;'><i>Your cats are waiting for the perfect strategy...</i></p>
+                <p style='color: #F7E1E7; margin-top: 15px;'><i>Your cats are waiting for the perfect strategy...</i></p>
             </div>
             """, unsafe_allow_html=True)
+
 
 # ==========================================
 # TAB 2: CAFE SIMULATION
@@ -701,8 +796,8 @@ with tab2:
     else:
         st.markdown("""
         <div class='info-box'>
-            <p style='color: #7ec8c8; font-weight: 600;'>Simulation Not Available</p>
-            <p style='color: #8892aa;'>Please solve the MDP first in the <b>'Configure & Solve'</b> tab to unlock the cafe simulation!</p>
+            <p style='color: #EEB3E9; font-weight: 600;'>Simulation Not Available</p>
+            <p style='color: #F7E1E7;'>Please solve the MDP first in the <b>'Configure & Solve'</b> tab to unlock the cafe simulation!</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -711,6 +806,7 @@ with tab2:
             <div style='font-size: 4em; animation: float 3s ease-in-out infinite;'>🐱</div>
         </div>
         """, unsafe_allow_html=True)
+
 
 # ==========================================
 # TAB 3: STRATEGY GUIDE WITH MATH
@@ -880,7 +976,7 @@ with tab3:
     
     with col_g1:
         st.markdown("""
-        <div class='math-box' style='border-left-color: #c89888;'>
+        <div class='math-box' style='border-left-color: #A782A9;'>
         <b>γ = 0.50</b><br>
         (Myopic Owner)<br><br>
         Focus: Today only<br>
@@ -893,7 +989,7 @@ with tab3:
     
     with col_g2:
         st.markdown("""
-        <div class='math-box' style='border-left-color: #7ec8c8;'>
+        <div class='math-box' style='border-left-color: #EEB3E9;'>
         <b>γ = 0.95</b><br>
         (Balanced Owner)<br><br>
         Focus: Near term<br>
@@ -906,7 +1002,7 @@ with tab3:
     
     with col_g3:
         st.markdown("""
-        <div class='math-box' style='border-left-color: #7aae98;'>
+        <div class='math-box' style='border-left-color: #84ACC4;'>
         <b>γ = 0.99</b><br>
         (Strategic Owner)<br><br>
         Focus: Long term<br>
