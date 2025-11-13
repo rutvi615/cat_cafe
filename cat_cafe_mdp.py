@@ -499,11 +499,8 @@ with tab1:
         labor_effect = st.slider("Labor_effect ", 0.0, 0.5, st.session_state.get('labor_effect', 0.08),
                         step=0.01, key='labor_effect_slider', label_visibility='collapsed')
 
-        st.write("")
-        st.write("**Lambda (λ): {:.2f}**".format(st.session_state.get('lambda', 0.9)))
-        _lambda = st.slider("Lambda (λ)", 0.0, 1.0, st.session_state.get('lambda', 0.9),
-                            step=0.01, key='lambda_slider', label_visibility='collapsed')
 
+        
         
         st.write("")
         
@@ -516,7 +513,7 @@ with tab1:
             st.session_state['staff_cost'] = staff_cost
             st.session_state['price_sens'] = price_sens
             st.session_state['labor_effect'] = labor_effect
-            st.session_state['lambda'] = _lambda
+            
                 
         if st.session_state.get('solve', False) and st.session_state.get('iterations'):
             iters = st.session_state.get('iterations', 0)
