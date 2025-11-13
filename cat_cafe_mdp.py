@@ -495,8 +495,8 @@ with tab1:
                             step=0.01, key='price_sens_slider', label_visibility='collapsed')
 
         st.write("")
-        st.write("**Labor_effect (α): {:.2f}**".format(st.session_state.get('labor_effect', 0.08)))
-        alpha = st.slider("Labor_effect (α)", 0.0, 0.5, st.session_state.get('labor_effect', 0.08),
+        st.write("**Labor_effect : {:.2f}**".format(st.session_state.get('labor_effect', 0.08)))
+        labor_effect = st.slider("Labor_effect ", 0.0, 0.5, st.session_state.get('labor_effect', 0.08),
                         step=0.01, key='labor_effect_slider', label_visibility='collapsed')
 
         st.write("")
