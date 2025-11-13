@@ -201,7 +201,7 @@ def reward(p, s, params, penalty=False):
     price = price_amounts[p] * params['multiplier']
     
     # Demand factors
-    sensitivity = 1 - params['price_sens'] * max(0, p - 1)
+    sensitivity = 1 - params['price_sens'] * (p-1)
     staff_bonus = 1 + params['labor_effect'] * (s)
     
     # Customer arrivals
