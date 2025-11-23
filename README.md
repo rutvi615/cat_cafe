@@ -2,7 +2,7 @@
 ### **AI for Cat Café Optimization Using Markov Decision Processes (MDPs)**  
 
 📄 **Full Report (PDF):**  
-[Download Whiskers_Cafe.pdf](./Whisker's_Cafe_Report.pdf)
+[Download Whiskers_Cafe.pdf](.cat_cafe/Whisker's_Cafe_Report.pdf)
 
 ---
 
@@ -166,7 +166,7 @@ And yes — all while managing a cozy cat café 😺☕.
 ## 📄 Report  
 You can view or download the full project report here:
 
-👉 **[Whiskers_Cafe.pdf](./Whisker's_Cafe_Report.pdf)**
+👉 **[Whiskers_Cafe.pdf](.cat_cafe/Whisker's_Cafe_Report.pdf)**
 
 ---
 
