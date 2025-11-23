@@ -335,7 +335,7 @@ def value_iteration(params, discount, max_iter, convergence_threshold=1e-3):
                     p_next, s_next = next_state(p, s, action)
                     r = reward(p_next, s_next, params, penalty=(action != 4))
                     
-                    expected_future = 0.9 * v[p_next, s_next] + 0.1 * np.mean(v)
+                    expected_future = v[p_next, s_next]
                     q_value = r + discount * expected_future
                     
                     q_values.append(q_value)
@@ -498,6 +498,145 @@ def create_policy_table(policy):
     return fig
 
 
+def create_convergence_plot(deltas):
+    """Visualize per-iteration delta decay for the value-iteration loop."""
+    iterations = np.arange(1, len(deltas) + 1)
+    fig, ax = plt.subplots(figsize=(11, 4))
+    
+    ax.plot(iterations, deltas, color='#EEB3E9', linewidth=2.5, marker='o', markersize=4)
+    ax.fill_between(iterations, deltas, color='#EEB3E9', alpha=0.15)
+    
+    ax.set_yscale('log')
+    ax.set_xlabel("Iteration", fontsize=12, color='#F7E1E7', fontweight=600)
+    ax.set_ylabel("Delta (log scale)", fontsize=12, color='#F7E1E7', fontweight=600)
+    ax.set_title("Value Iteration Convergence", fontsize=15, color='#F7E1E7', pad=14, fontweight=600)
+    
+    ax.grid(color='#49316D', linestyle='--', linewidth=1, alpha=0.5)
+    ax.set_facecolor('#2D142C')
+    fig.patch.set_facecolor('#2D142C')
+    ax.tick_params(colors='#F7E1E7')
+    ax.spines['bottom'].set_color('#EEB3E9')
+    ax.spines['left'].set_color('#EEB3E9')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    plt.tight_layout()
+    return fig
+
+
+def create_reward_history_plot(history):
+    """Plot daily and cumulative profit trajectories during the simulator gameplay."""
+    if not history:
+        return None
+    
+    df = pd.DataFrame(history)
+    df['cumulative_profit'] = df['profit'].cumsum()
+    
+    fig, ax1 = plt.subplots(figsize=(11, 4))
+    ax2 = ax1.twinx()
+    
+    ax1.plot(df['day'], df['profit'], color='#84ACC4', linewidth=2.2, marker='o', label='Daily Profit')
+    ax2.plot(df['day'], df['cumulative_profit'], color='#EEB3E9', linewidth=2.2, linestyle='--', label='Cumulative Profit')
+    
+    ax1.set_xlabel("Day", fontsize=12, color='#F7E1E7', fontweight=600)
+    ax1.set_ylabel("Daily Profit ($)", fontsize=12, color='#84ACC4', fontweight=600)
+    ax2.set_ylabel("Cumulative Profit ($)", fontsize=12, color='#EEB3E9', fontweight=600)
+    
+    ax1.set_title("Cafe Performance Over Time", fontsize=15, color='#F7E1E7', pad=14, fontweight=600)
+    
+    ax1.grid(color='#49316D', linestyle='--', linewidth=1, alpha=0.4)
+    ax1.set_facecolor('#2D142C')
+    ax2.set_facecolor('none')
+    fig.patch.set_facecolor('#2D142C')
+    
+    ax1.tick_params(colors='#F7E1E7')
+    ax2.tick_params(colors='#F7E1E7')
+    for spine in ax1.spines.values():
+        spine.set_color('#EEB3E9')
+    for spine in ax2.spines.values():
+        spine.set_color('#EEB3E9')
+    
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc='upper left', facecolor='#2D142C', edgecolor='#EEB3E9')
+    
+    plt.tight_layout()
+    return fig
+
+
+def q_learning(params, discount, episodes, alpha, epsilon, max_steps):
+    """Tabular Q-learning for the cafe MDP."""
+    q_table = np.zeros((NUM_PRICES, NUM_STAFF, NUM_ACTIONS))
+    rewards_history = []
+    
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    for episode in range(episodes):
+        p = np.random.randint(NUM_PRICES)
+        s = np.random.randint(NUM_STAFF)
+        episode_reward = 0
+        
+        for step in range(max_steps):
+            if np.random.rand() < epsilon:
+                action = np.random.randint(NUM_ACTIONS)
+            else:
+                action = int(np.argmax(q_table[p, s]))
+            
+            p_next, s_next = next_state(p, s, action)
+            r = reward(p_next, s_next, params, penalty=(action != 4))
+            
+            best_next = np.max(q_table[p_next, s_next])
+            q_table[p, s, action] = (1 - alpha) * q_table[p, s, action] + alpha * (r + discount * best_next)
+            
+            p, s = p_next, s_next
+            episode_reward += r
+        
+        rewards_history.append(episode_reward)
+        progress = (episode + 1) / episodes
+        progress_bar.progress(progress)
+        status_text.text(f"Episode {episode + 1}/{episodes} | Reward: {episode_reward:.2f}")
+    
+    progress_bar.empty()
+    status_text.empty()
+    
+    state_values = np.max(q_table, axis=2)
+    policy = np.argmax(q_table, axis=2)
+    
+    return state_values, policy, rewards_history
+
+
+def create_learning_curve(rewards, window=20):
+    """Plot episode reward trajectory with rolling average for Q-learning."""
+    if not rewards:
+        return None
+    
+    episodes = np.arange(1, len(rewards) + 1)
+    rewards_series = pd.Series(rewards)
+    rolling = rewards_series.rolling(window=window, min_periods=1).mean()
+    
+    fig, ax = plt.subplots(figsize=(11, 4))
+    
+    ax.plot(episodes, rewards, color='#84ACC4', linewidth=1.8, label='Episode Reward', alpha=0.7)
+    ax.plot(episodes, rolling, color='#EEB3E9', linewidth=2.5, label=f'Rolling Avg ({window})')
+    
+    ax.set_xlabel("Episode", fontsize=12, color='#F7E1E7', fontweight=600)
+    ax.set_ylabel("Reward", fontsize=12, color='#F7E1E7', fontweight=600)
+    ax.set_title("Q-Learning Reward Curve", fontsize=15, color='#F7E1E7', pad=14, fontweight=600)
+    
+    ax.grid(color='#49316D', linestyle='--', linewidth=1, alpha=0.4)
+    ax.set_facecolor('#2D142C')
+    fig.patch.set_facecolor('#2D142C')
+    ax.tick_params(colors='#F7E1E7')
+    
+    for spine in ax.spines.values():
+        spine.set_color('#EEB3E9')
+    
+    ax.legend(loc='lower right', facecolor='#2D142C', edgecolor='#EEB3E9')
+    plt.tight_layout()
+    return fig
+
+
 # ==========================================
 # Main App
 # ==========================================
@@ -555,6 +694,12 @@ with tab1:
         """, unsafe_allow_html=True)
         
         st.write("")
+        algo_options = ["Value Iteration", "Q-Learning"]
+        default_algo = st.session_state.get('algorithm', algo_options[0])
+        algo_index = algo_options.index(default_algo) if default_algo in algo_options else 0
+        algorithm = st.radio("Choose Solver", algo_options, index=algo_index)
+        
+        st.write("")
         
         st.write("**Discount Factor (γ): {:.2f}**".format(st.session_state.get('gamma', 0.95)))
         st.write("<span style='color: #F7E1E7; font-size: 13px;'>How much you value future profit</span>", unsafe_allow_html=True)
@@ -592,8 +737,31 @@ with tab1:
                         step=0.01, key='labor_effect_slider', label_visibility='collapsed')
 
 
-
-        
+        if algorithm == "Q-Learning":
+            st.write("")
+            st.write("**Episodes: {}**".format(st.session_state.get('episodes', 400)))
+            episodes = st.slider("Episodes", 100, 2000, st.session_state.get('episodes', 400),
+                                 step=50, key='episodes_slider', label_visibility='collapsed')
+            
+            st.write("")
+            st.write("**Learning Rate (α): {:.2f}**".format(st.session_state.get('alpha', 0.3)))
+            alpha = st.slider("Learning Rate", 0.01, 1.0, st.session_state.get('alpha', 0.3),
+                              step=0.01, key='alpha_slider', label_visibility='collapsed')
+            
+            st.write("")
+            st.write("**Exploration (ε): {:.2f}**".format(st.session_state.get('epsilon', 0.2)))
+            epsilon = st.slider("Exploration Rate", 0.0, 1.0, st.session_state.get('epsilon', 0.2),
+                                step=0.01, key='epsilon_slider', label_visibility='collapsed')
+            
+            st.write("")
+            st.write("**Max Steps / Episode: {}**".format(st.session_state.get('max_steps', 30)))
+            max_steps = st.slider("Max Steps", 5, 100, st.session_state.get('max_steps', 30),
+                                  step=5, key='steps_slider', label_visibility='collapsed')
+        else:
+            episodes = st.session_state.get('episodes', 400)
+            alpha = st.session_state.get('alpha', 0.3)
+            epsilon = st.session_state.get('epsilon', 0.2)
+            max_steps = st.session_state.get('max_steps', 30)
         
         st.write("")
         
@@ -606,20 +774,40 @@ with tab1:
             st.session_state['staff_cost'] = staff_cost
             st.session_state['price_sens'] = price_sens
             st.session_state['labor_effect'] = labor_effect
+            st.session_state['algorithm'] = algorithm
+            st.session_state['episodes'] = episodes
+            st.session_state['alpha'] = alpha
+            st.session_state['epsilon'] = epsilon
+            st.session_state['max_steps'] = max_steps
             
                 
-        if st.session_state.get('solve', False) and st.session_state.get('iterations'):
-            iters = st.session_state.get('iterations', 0)
-            deltas = st.session_state.get('deltas', [])
-            final_delta = deltas[-1] if deltas else 0
+        if st.session_state.get('solve', False):
             best_val = st.session_state.get('values', np.zeros((3,4))).max() if st.session_state.get('values') is not None else 0
+            solver_used = st.session_state.get('algorithm', 'Value Iteration')
             
-            st.markdown(f"""
-            <div class='info-box' style='margin-top: 25px;'>
-                <p style='color: #EEB3E9; font-weight: 600; margin: 8px 0;'>Converged in {iters} iterations</p>
-                <p style='color: #F7E1E7; margin: 8px 0; font-size: 13px;'>Final delta: {final_delta:.8f}</p>
-            </div>
-            """, unsafe_allow_html=True)
+            if solver_used == "Value Iteration" and st.session_state.get('iterations'):
+                iters = st.session_state.get('iterations', 0)
+                deltas = st.session_state.get('deltas', [])
+                final_delta = deltas[-1] if deltas else 0
+                
+                st.markdown(f"""
+                <div class='info-box' style='margin-top: 25px;'>
+                    <p style='color: #EEB3E9; font-weight: 600; margin: 8px 0;'>Converged in {iters} iterations</p>
+                    <p style='color: #F7E1E7; margin: 8px 0; font-size: 13px;'>Final delta: {final_delta:.8f}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            elif solver_used == "Q-Learning" and st.session_state.get('episodes_run'):
+                episodes_run = st.session_state.get('episodes_run', 0)
+                rewards = st.session_state.get('learning_rewards', [])
+                recent_reward = rewards[-1] if rewards else 0
+                best_reward = max(rewards) if rewards else 0
+                
+                st.markdown(f"""
+                <div class='info-box' style='margin-top: 25px;'>
+                    <p style='color: #EEB3E9; font-weight: 600; margin: 8px 0;'>Trained for {episodes_run} episodes</p>
+                    <p style='color: #F7E1E7; margin: 8px 0; font-size: 13px;'>Latest reward: ${recent_reward:.2f} | Best: ${best_reward:.2f}</p>
+                </div>
+                """, unsafe_allow_html=True)
             
             st.markdown(f"""
             <div class='success-box' style='margin-top: 15px;'>
@@ -640,14 +828,27 @@ with tab1:
                 }
 
 
+            deltas = []
+            rewards_history = []
+            iterations = None
             
-            with st.spinner('Solving MDP...'):
-                values, policy, deltas, iterations = value_iteration(params, gamma, max_iter)
+            if algorithm == "Value Iteration":
+                with st.spinner('Solving MDP...'):
+                    values, policy, deltas, iterations = value_iteration(params, gamma, max_iter)
+                st.session_state['deltas'] = deltas
+                st.session_state['iterations'] = iterations
+                st.session_state['learning_rewards'] = []
+                st.session_state['episodes_run'] = None
+            else:
+                with st.spinner('Training Q-Learning Agent...'):
+                    values, policy, rewards_history = q_learning(params, gamma, episodes, alpha, epsilon, max_steps)
+                st.session_state['learning_rewards'] = rewards_history
+                st.session_state['episodes_run'] = episodes
+                st.session_state['deltas'] = []
+                st.session_state['iterations'] = None
             
             st.session_state['values'] = values
             st.session_state['policy'] = policy
-            st.session_state['deltas'] = deltas
-            st.session_state['iterations'] = iterations
             
             st.subheader("Value Function Heatmap")
             st.write("<span style='color: #F7E1E7; font-size: 13px;'>Expected profit for each price/staff combination</span>", 
@@ -660,6 +861,21 @@ with tab1:
                     unsafe_allow_html=True)
             fig_policy = create_policy_table(policy)
             st.pyplot(fig_policy, use_container_width=True)
+            
+            if algorithm == "Value Iteration" and deltas:
+                st.subheader("Convergence Tracker")
+                st.write("<span style='color: #F7E1E7; font-size: 13px;'>Monitor how the Bellman updates shrink over each iteration</span>", 
+                        unsafe_allow_html=True)
+                fig_conv = create_convergence_plot(deltas)
+                st.pyplot(fig_conv, use_container_width=True)
+                st.caption("Delta is plotted on a log scale to highlight late-stage convergence.")
+            elif algorithm == "Q-Learning" and rewards_history:
+                st.subheader("Learning Curve")
+                st.write("<span style='color: #F7E1E7; font-size: 13px;'>Episode rewards with a rolling average for stability</span>", 
+                        unsafe_allow_html=True)
+                fig_learn = create_learning_curve(rewards_history)
+                if fig_learn:
+                    st.pyplot(fig_learn, use_container_width=True)
         else:
             st.markdown("""
             <div class='info-box'>
@@ -747,14 +963,16 @@ with tab2:
             if st.button("Simulate Day", use_container_width=True):
                 action_idx = int(ACTIONS.index(action_choice))
                 new_p, new_s = next_state(game['price_idx'], game['staff_idx'], action_idx)
-                prof = reward(new_p, new_s, {
-                    'cust_rate': 25,
-                    'price_sens': 0.9,
-                    'labor_effect': 0.08,
-                    'staff_cost': 15,
-                    'multiplier': 1.0,
+                # Use solved parameters from tab 1
+                params = {
+                    'cust_rate': st.session_state.get('cust_rate', 25),
+                    'price_sens': st.session_state.get('price_sens', 0.13),
+                    'labor_effect': st.session_state.get('labor_effect', 0.08),
+                    'staff_cost': st.session_state.get('staff_cost', 15),
+                    'multiplier': st.session_state.get('multiplier', 1.0),
                     'penalty': 5
-                }, penalty=(action_idx != 4))
+                }
+                prof = reward(new_p, new_s, params, penalty=(action_idx != 4))
                 
                 game['total_profit'] += prof
                 game['history'].append({
@@ -784,6 +1002,12 @@ with tab2:
             st.dataframe(history_df[['day', 'action', 'Price', 'Staff', 'Profit']], 
                         use_container_width=True, hide_index=True)
             
+            fig_rewards = create_reward_history_plot(game['history'])
+            if fig_rewards:
+                st.write("<span style='color: #F7E1E7; font-size: 13px;'>Track how your decisions compound over time</span>",
+                         unsafe_allow_html=True)
+                st.pyplot(fig_rewards, use_container_width=True)
+            
             if st.button("Restart Simulation", use_container_width=True):
                 st.session_state['game_state'] = {
                     'price_idx': 1,
@@ -812,6 +1036,17 @@ with tab2:
 # TAB 3: STRATEGY GUIDE WITH MATH
 # ==========================================
 with tab3:
+    current_cust_rate = st.session_state.get('cust_rate', 25)
+    current_price_sens = st.session_state.get('price_sens', 0.13)
+    current_labor_effect = st.session_state.get('labor_effect', 0.08)
+    current_staff_cost = st.session_state.get('staff_cost', 15)
+    current_multiplier = st.session_state.get('multiplier', 1.0)
+    active_algorithm = st.session_state.get('algorithm', 'Value Iteration')
+    current_alpha = st.session_state.get('alpha', 0.3)
+    current_epsilon = st.session_state.get('epsilon', 0.2)
+    current_episodes = st.session_state.get('episodes', 400)
+    current_max_steps = st.session_state.get('max_steps', 30)
+    
     st.subheader("Understanding Your Cat Cafe Strategy")
     
     st.markdown("""
@@ -866,7 +1101,7 @@ with tab3:
     Revenue = N_customers × Price<br><br>
     Where:<br>
     N_customers = C₀ × f_price(p) × f_staff(w)<br><br>
-    <b>Explanation:</b> Customer count depends on base arrival (C₀ = 25/day),
+    <b>Explanation:</b> Customer count depends on base arrival (C₀ = """ + f"{current_cust_rate:.0f}" + """/day),
     price level (higher price → fewer customers), and staff level (more staff → better service → more customers stay)
     </div>
     """, unsafe_allow_html=True)
@@ -875,10 +1110,10 @@ with tab3:
     <div class='reward-term'>
     <b>Price Sensitivity Factor:</b><br>
     f_price(p) = 1 - α × (p - 1)<br>
-    where α = 0.13 (price sensitivity coefficient)<br><br>
-    p=0 (Low):     f_price = 1 - 0.13×(-1) = 1.13  (13% more customers)<br>
-    p=1 (Medium):  f_price = 1 - 0.13×(0) = 1.00   (baseline)<br>
-    p=2 (High):    f_price = 1 - 0.13×(1) = 0.87   (13% fewer customers)<br><br>
+    where α = """ + f"{current_price_sens:.2f}" + """ (price sensitivity coefficient)<br><br>
+    p=0 (Low):     f_price = """ + f"{1 - current_price_sens * (-1):.2f}" + """<br>
+    p=1 (Medium):  f_price = """ + f"{1 - current_price_sens * (0):.2f}" + """<br>
+    p=2 (High):    f_price = """ + f"{1 - current_price_sens * (1):.2f}" + """<br><br>
     <b>Interpretation:</b> Elasticity of demand with respect to price.
     </div>
     """, unsafe_allow_html=True)
@@ -887,11 +1122,11 @@ with tab3:
     <div class='reward-term'>
     <b>Staff Quality Factor:</b><br>
     f_staff(w) = 1 + λ × w<br>
-    where λ = 0.08 (staff effectiveness coefficient)<br><br>
-    w=0 (1 person):  f_staff = 1 + 0.08×0 = 1.00  (baseline)<br>
-    w=1 (2 people):  f_staff = 1 + 0.08×1 = 1.08  (8% more customers)<br>
-    w=2 (3 people):  f_staff = 1 + 0.08×2 = 1.16  (16% more customers)<br>
-    w=3 (4 people):  f_staff = 1 + 0.08×3 = 1.24  (24% more customers)<br><br>
+    where λ = """ + f"{current_labor_effect:.2f}" + """ (staff effectiveness coefficient)<br><br>
+    w=0 (1 person):  f_staff = """ + f"{1 + current_labor_effect * 0:.2f}" + """<br>
+    w=1 (2 people):  f_staff = """ + f"{1 + current_labor_effect * 1:.2f}" + """<br>
+    w=2 (3 people):  f_staff = """ + f"{1 + current_labor_effect * 2:.2f}" + """<br>
+    w=3 (4 people):  f_staff = """ + f"{1 + current_labor_effect * 3:.2f}" + """<br><br>
     <b>Interpretation:</b> Service quality improves with more staff → better customer experience → more sales.
     </div>
     """, unsafe_allow_html=True)
@@ -900,11 +1135,11 @@ with tab3:
     <div class='reward-term'>
     <b>Labor Cost Component:</b><br>
     Cost_labor = (w + 1) × wage × hours<br>
-    Cost_labor = (w + 1) × $20/hr × 8 hrs<br><br>
-    w=0 (1 person):  Cost = 1 × $20 × 8 = $160<br>
-    w=1 (2 people):  Cost = 2 × $20 × 8 = $320<br>
-    w=2 (3 people):  Cost = 3 × $20 × 8 = $480<br>
-    w=3 (4 people):  Cost = 4 × $20 × 8 = $640<br><br>
+    Cost_labor = (w + 1) × $""" + f"{current_staff_cost:.0f}" + """/hr × 8 hrs<br><br>
+    w=0 (1 person):  Cost = $""" + f"{(1) * current_staff_cost * 8:.0f}" + """<br>
+    w=1 (2 people):  Cost = $""" + f"{(2) * current_staff_cost * 8:.0f}" + """<br>
+    w=2 (3 people):  Cost = $""" + f"{(3) * current_staff_cost * 8:.0f}" + """<br>
+    w=3 (4 people):  Cost = $""" + f"{(4) * current_staff_cost * 8:.0f}" + """<br><br>
     <b>Key Insight:</b> Linear cost but diminishing marginal benefit → need to find optimal staff level.
     </div>
     """, unsafe_allow_html=True)
@@ -916,11 +1151,11 @@ with tab3:
     <b>Transition Penalty:</b> $5 penalty if action changes state (encourages stability)<br>
     1(a ≠ "Maintain") = 1 if action changes state, 0 if maintaining<br><br>
     <b>Example Calculation (Medium Price, 2 Staff):</b><br>
-    N = 25 × 1.0 × 1.08 = 27 customers<br>
-    Revenue = 27 × $8 = $216<br>
-    Labor = 2 × $20 × 8 = $320<br>
-    Profit (Maintain) = $216 - $320 - $0 = -$104<br>
-    Profit (Change) = $216 - $320 - $5 = -$109
+    N = """ + f"{current_cust_rate:.0f}" + """ × """ + f"{1 - current_price_sens * 0:.2f}" + """ × """ + f"{1 + current_labor_effect * 1:.2f}" + """ ≈ """ + f"{current_cust_rate * (1 - current_price_sens * 0) * (1 + current_labor_effect * 1):.0f}" + """ customers<br>
+    Revenue = N × $""" + f"{8 * current_multiplier:.2f}" + """<br>
+    Labor = 2 × $""" + f"{current_staff_cost:.0f}" + """ × 8 = $""" + f"{2 * current_staff_cost * 8:.0f}" + """<br>
+    Profit (Maintain) = Revenue - Labor<br>
+    Profit (Change) = Revenue - Labor - $5
     </div>
     """, unsafe_allow_html=True)
     
@@ -1041,3 +1276,21 @@ with tab3:
     
     The techniques from Whisker's Cafe form the foundation of operational optimization!
     """)
+    
+    st.markdown("""
+    ### Model-Free Reinforcement Learning (Q-Learning)
+    """)
+    
+    st.markdown(f"""
+    <div class='math-box'>
+    <b>When you select Q-Learning in Tab 1:</b><br>
+    • Episodes = {current_episodes}<br>
+    • Max Steps per Episode = {current_max_steps}<br>
+    • Learning Rate α = {current_alpha:.2f}<br>
+    • Exploration ε = {current_epsilon:.2f}<br><br>
+    <b>Update Rule:</b><br>
+    Q(s,a) ← (1 - α) Q(s,a) + α [ R + γ · max_a' Q(s',a') ]<br><br>
+    <b>Exploration:</b> ε-greedy policy randomly explores with probability ε and exploits otherwise.<br>
+    <b>Convergence Intuition:</b> With sufficient exploration and a decaying learning rate, the Q-table approaches the optimal action-value function even without knowing transition probabilities.
+    </div>
+    """, unsafe_allow_html=True)
